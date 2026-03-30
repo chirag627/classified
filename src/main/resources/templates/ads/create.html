@@ -4,18 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post New Ad - ClassifiedAds</title>
+    <title>Post New Ad - OLXAds</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link th:href="@{/css/custom.css}" rel="stylesheet">
 </head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+<body style="background:#f7f8fa;">
+
+<div id="alertContainer"></div>
+
+<nav class="olx-navbar navbar" style="padding:10px 0;">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="bi bi-grid-3x3-gap-fill me-2"></i>ClassifiedAds</a>
-        <ul class="navbar-nav ms-auto align-items-center">
+        <a class="navbar-brand" th:href="@{/}">
+            <span style="color:#ffce32;font-weight:900;font-size:1.5rem;letter-spacing:-1px;">OLX</span><span style="color:white;font-size:1.1rem;font-weight:600;">Ads</span>
+        </a>
+        <ul class="navbar-nav ms-auto flex-row gap-3 align-items-center">
             <li class="nav-item"><a class="nav-link" th:href="@{/user/dashboard}">Dashboard</a></li>
-            <li class="nav-item"><button class="btn btn-outline-light btn-sm ms-1" onclick="logout()">Logout</button></li>
+            <li class="nav-item"><button class="btn btn-sm btn-outline-light" onclick="logout()">Logout</button></li>
         </ul>
     </div>
 </nav>
@@ -23,83 +28,104 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <h2 class="mb-4"><i class="bi bi-plus-circle me-2"></i>Post New Ad</h2>
-            <div id="alertContainer"></div>
+            <h2 style="font-weight:700;margin-bottom:20px;">
+                <i class="bi bi-plus-circle me-2" style="color:#002f34;"></i>Post Your Ad
+            </h2>
 
             <form id="createAdForm">
-                <div class="card mb-4">
-                    <div class="card-header"><h6 class="mb-0">Basic Information</h6></div>
-                    <div class="card-body">
+                <!-- Basic Info -->
+                <div style="background:white;border-radius:10px;border:1px solid #e0e0e0;overflow:hidden;margin-bottom:16px;">
+                    <div style="background:#f7f8fa;padding:14px 20px;border-bottom:1px solid #e0e0e0;">
+                        <h6 style="margin:0;font-weight:700;">📝 Basic Information</h6>
+                    </div>
+                    <div style="padding:20px;">
                         <div class="mb-3">
-                            <label class="form-label fw-medium">Title *</label>
-                            <input type="text" class="form-control" id="title" name="title" required
-                                   placeholder="What are you selling?">
+                            <label class="form-label fw-semibold" style="font-size:13px;">Ad Title *</label>
+                            <input type="text" class="form-control" id="title" required
+                                   placeholder="e.g. iPhone 14 Pro Max 256GB - Excellent Condition"
+                                   maxlength="100">
+                            <small class="text-muted">Be specific and clear about what you're selling</small>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-medium">Category *</label>
-                            <select class="form-select" id="categoryId" name="categoryId" required>
-                                <option value="">Select a category</option>
-                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Category</option>
+                            <label class="form-label fw-semibold" style="font-size:13px;">Category *</label>
+                            <select class="form-select" id="categoryId" required>
+                                <option value="">Select a category...</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}"
+                                        th:text="${cat.icon + ' ' + cat.name}">Category</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-medium">Description *</label>
-                            <textarea class="form-control" id="description" name="description" rows="5" required
-                                      placeholder="Describe your item in detail..."></textarea>
+                            <label class="form-label fw-semibold" style="font-size:13px;">Description *</label>
+                            <textarea class="form-control" id="description" rows="5" required
+                                      placeholder="Describe your item: brand, model, age, features, reason for selling..."></textarea>
+                            <small class="text-muted">More details = more buyers!</small>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-medium">Condition</label>
-                                <select class="form-select" id="condition" name="condition">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" style="font-size:13px;">Condition</label>
+                                <select class="form-select" id="condition">
                                     <option value="">Select condition</option>
-                                    <option value="NEW">New</option>
-                                    <option value="USED">Used</option>
+                                    <option value="NEW">✅ New</option>
+                                    <option value="USED">🔄 Used</option>
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-medium">Price ($) *</label>
-                                <input type="number" class="form-control" id="price" name="price" required
-                                       min="0" step="0.01" placeholder="0.00">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" style="font-size:13px;">Price (₹) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="price" required
+                                           min="0" step="1" placeholder="0">
+                                </div>
                             </div>
                         </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="negotiable" name="negotiable">
-                            <label class="form-check-label" for="negotiable">Price is negotiable</label>
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="negotiable">
+                            <label class="form-check-label" for="negotiable" style="font-size:14px;">
+                                Price is negotiable
+                            </label>
                         </div>
                     </div>
                 </div>
 
-                <div class="card mb-4">
-                    <div class="card-header"><h6 class="mb-0">Images</h6></div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">Upload Images (Max 5, 10MB each)</label>
-                            <input type="file" class="form-control" id="imageFiles" accept="image/*" multiple>
-                        </div>
-                        <div id="imagePreviewContainer" class="row g-2 mt-2"></div>
-                        <input type="hidden" id="uploadedImages" name="uploadedImages">
+                <!-- Images -->
+                <div style="background:white;border-radius:10px;border:1px solid #e0e0e0;overflow:hidden;margin-bottom:16px;">
+                    <div style="background:#f7f8fa;padding:14px 20px;border-bottom:1px solid #e0e0e0;">
+                        <h6 style="margin:0;font-weight:700;">📸 Photos <small style="font-weight:400;color:#888;">(Up to 5 images)</small></h6>
+                    </div>
+                    <div style="padding:20px;">
+                        <label style="display:block;border:2px dashed #ccc;border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:border-color 0.2s;"
+                               id="uploadArea">
+                            <i class="bi bi-camera" style="font-size:2rem;color:#ccc;"></i>
+                            <p style="margin:8px 0 4px;font-weight:600;color:#555;">Click to upload photos</p>
+                            <p style="margin:0;font-size:12px;color:#aaa;">JPG, PNG up to 10MB each</p>
+                            <input type="file" id="imageFiles" accept="image/*" multiple style="display:none;">
+                        </label>
+                        <div id="imagePreviewContainer" class="row g-2 mt-3"></div>
                     </div>
                 </div>
 
-                <div class="card mb-4">
-                    <div class="card-header"><h6 class="mb-0">Location</h6></div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-medium">City</label>
-                                <input type="text" class="form-control" id="city" name="city" placeholder="City">
+                <!-- Location -->
+                <div style="background:white;border-radius:10px;border:1px solid #e0e0e0;overflow:hidden;margin-bottom:16px;">
+                    <div style="background:#f7f8fa;padding:14px 20px;border-bottom:1px solid #e0e0e0;">
+                        <h6 style="margin:0;font-weight:700;">📍 Location</h6>
+                    </div>
+                    <div style="padding:20px;">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" style="font-size:13px;">City</label>
+                                <input type="text" class="form-control" id="city" placeholder="e.g. Mumbai">
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-medium">State</label>
-                                <input type="text" class="form-control" id="state" name="state" placeholder="State">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" style="font-size:13px;">State</label>
+                                <input type="text" class="form-control" id="state" placeholder="e.g. Maharashtra">
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="d-flex gap-3">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="bi bi-check-circle me-2"></i>Post Ad
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold" style="min-width:160px;">
+                        <i class="bi bi-check-circle me-2"></i>Post Ad for FREE
                     </button>
                     <a th:href="@{/user/dashboard}" class="btn btn-outline-secondary btn-lg">Cancel</a>
                 </div>
@@ -108,13 +134,44 @@
     </div>
 </div>
 
+<!-- Footer -->
+<footer class="olx-footer">
+    <div class="container">
+        <p class="footer-bottom text-center mb-0">&copy; 2024 OLXAds. All rights reserved.</p>
+    </div>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/js/app.js}"></script>
 <script>
+// Upload area styling
+document.getElementById('uploadArea').addEventListener('dragover', e => {
+    e.preventDefault();
+    e.currentTarget.style.borderColor = '#002f34';
+});
+document.getElementById('uploadArea').addEventListener('dragleave', e => {
+    e.currentTarget.style.borderColor = '#ccc';
+});
+document.getElementById('uploadArea').addEventListener('drop', e => {
+    e.preventDefault();
+    e.currentTarget.style.borderColor = '#ccc';
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles && droppedFiles.length > 0) {
+        previewImages(droppedFiles, 'imagePreviewContainer');
+    }
+});
+
+document.getElementById('imageFiles').addEventListener('change', function() {
+    previewImages(this.files, 'imagePreviewContainer');
+});
+
 document.getElementById('createAdForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const token = localStorage.getItem('jwt_token');
     if (!token) { window.location.href = '/auth/login'; return; }
+    const btn = this.querySelector('button[type=submit]');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Posting your ad...';
 
     // Upload images first
     const imageFiles = document.getElementById('imageFiles').files;
@@ -122,44 +179,54 @@ document.getElementById('createAdForm').addEventListener('submit', async functio
     if (imageFiles.length > 0) {
         const formData = new FormData();
         for (let f of imageFiles) formData.append('files', f);
-        const uploadRes = await fetch('/api/ads/upload-images', {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token },
-            body: formData
-        });
-        if (uploadRes.ok) imagePaths = await uploadRes.json();
+        try {
+            const uploadRes = await fetch('/api/ads/upload-images', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+            });
+            if (uploadRes.ok) {
+                imagePaths = await uploadRes.json();
+            } else {
+                showAlert('warning', '⚠️ Image upload failed. Your ad will be posted without images.');
+            }
+        } catch (uploadErr) {
+            showAlert('warning', '⚠️ Image upload failed. Posting without images.');
+        }
     }
 
     const data = {
-        title: document.getElementById('title').value,
-        description: document.getElementById('description').value,
+        title: document.getElementById('title').value.trim(),
+        description: document.getElementById('description').value.trim(),
         categoryId: document.getElementById('categoryId').value,
         price: parseFloat(document.getElementById('price').value),
         negotiable: document.getElementById('negotiable').checked,
         condition: document.getElementById('condition').value || null,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
+        city: document.getElementById('city').value.trim(),
+        state: document.getElementById('state').value.trim(),
         images: imagePaths
     };
 
-    const res = await fetch('/api/ads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify(data)
-    });
-
-    if (res.ok) {
-        const ad = await res.json();
-        showAlert('success', 'Ad posted successfully! It is pending review.');
-        setTimeout(() => window.location.href = '/user/dashboard', 2000);
-    } else {
-        const err = await res.json();
-        showAlert('danger', err.error || 'Failed to post ad.');
+    try {
+        const res = await fetch('/api/ads', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify(data)
+        });
+        if (res.ok) {
+            showAlert('success', '🎉 Ad posted successfully! It will be visible after review.');
+            setTimeout(() => window.location.href = '/user/dashboard', 2000);
+        } else {
+            const err = await res.json();
+            showAlert('danger', '❌ ' + (err.error || 'Failed to post ad. Please fill all required fields.'));
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Post Ad for FREE';
+        }
+    } catch (err) {
+        showAlert('danger', '⚠️ Connection error. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Post Ad for FREE';
     }
-});
-
-document.getElementById('imageFiles').addEventListener('change', function() {
-    previewImages(this.files, 'imagePreviewContainer');
 });
 </script>
 </body>

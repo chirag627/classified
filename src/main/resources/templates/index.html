@@ -10,39 +10,46 @@
     <link th:href="@{/css/custom.css}" rel="stylesheet">
 </head>
 <body>
+
+<!-- Alert Container -->
+<div id="alertContainer"></div>
+
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+<nav class="navbar navbar-expand-lg olx-navbar sticky-top">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/}">
-            <i class="bi bi-grid-3x3-gap-fill me-2"></i>ClassifiedAds
+        <a class="navbar-brand" th:href="@{/}">
+            <span style="color:#ffce32;font-weight:900;font-size:1.5rem;letter-spacing:-1px;">OLX</span><span style="color:white;font-size:1.1rem;font-weight:600;">Ads</span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <form class="d-flex mx-auto" style="width: 40%;" th:action="@{/ads}" method="get">
-                <input class="form-control me-2" type="search" name="keyword" placeholder="Search ads...">
-                <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i></button>
+            <!-- Search Bar -->
+            <form class="d-flex mx-auto search-bar" style="width: 42%;" th:action="@{/ads}" method="get">
+                <input class="form-control" type="search" name="keyword" placeholder="Find Cars, Mobiles, Houses...">
+                <button type="submit"><i class="bi bi-search"></i> Search</button>
             </form>
-            <ul class="navbar-nav ms-auto align-items-center">
-                <li class="nav-item"><a class="nav-link" th:href="@{/ads}">Browse Ads</a></li>
+            <ul class="navbar-nav ms-auto align-items-center gap-1">
+                <li class="nav-item"><a class="nav-link" th:href="@{/ads}"><i class="bi bi-grid me-1"></i>Browse</a></li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" th:href="@{/ads/create}"><i class="bi bi-plus-circle me-1"></i>Post Ad</a>
-                </li>
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" th:href="@{/user/dashboard}"><i class="bi bi-person-circle me-1"></i>Dashboard</a>
+                    <a class="nav-link" th:href="@{/user/dashboard}"><i class="bi bi-person-circle me-1"></i>My Account</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link text-warning" th:href="@{/admin/dashboard}"><i class="bi bi-shield-check me-1"></i>Admin</a>
+                    <a class="nav-link" th:href="@{/admin/dashboard}" style="color:#ffce32 !important;"><i class="bi bi-shield-check me-1"></i>Admin</a>
                 </li>
                 <li class="nav-item" sec:authorize="!isAuthenticated()">
                     <a class="nav-link" th:href="@{/auth/login}">Login</a>
                 </li>
-                <li class="nav-item" sec:authorize="!isAuthenticated()">
-                    <a class="btn btn-outline-light btn-sm ms-1" th:href="@{/auth/register}">Register</a>
-                </li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <button class="btn btn-outline-light btn-sm ms-1" onclick="logout()">Logout</button>
+                    <button class="btn btn-sm btn-outline-light ms-1" onclick="logout()">Logout</button>
+                </li>
+                <li class="nav-item">
+                    <a class="btn-sell ms-2" th:href="@{/ads/create}" sec:authorize="isAuthenticated()">
+                        <i class="bi bi-plus-circle-fill"></i> + SELL
+                    </a>
+                    <a class="btn-sell ms-2" th:href="@{/auth/login}" sec:authorize="!isAuthenticated()">
+                        <i class="bi bi-plus-circle-fill"></i> + SELL
+                    </a>
                 </li>
             </ul>
         </div>
@@ -50,34 +57,40 @@
 </nav>
 
 <!-- Hero Section -->
-<section class="hero-section bg-primary text-white py-5">
+<section class="hero-section">
     <div class="container text-center">
-        <h1 class="display-4 fw-bold mb-3">Buy &amp; Sell Locally</h1>
-        <p class="lead mb-4">Find great deals or sell your items to people nearby</p>
+        <h1 class="mb-2">Buy &amp; Sell Locally — Fast &amp; Free</h1>
+        <p class="mb-4">Post your ad for free and connect with buyers near you</p>
         <form th:action="@{/ads}" method="get" class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="input-group input-group-lg">
-                    <input type="text" class="form-control" name="keyword" placeholder="What are you looking for?">
-                    <button class="btn btn-warning fw-bold" type="submit">
+            <div class="col-md-7">
+                <div class="input-group hero-search-bar">
+                    <input type="text" class="form-control" name="keyword" placeholder="Search for Cars, Mobiles, Furniture, Jobs...">
+                    <button class="btn-search" type="submit">
                         <i class="bi bi-search me-1"></i>Search
                     </button>
                 </div>
             </div>
         </form>
+        <div class="mt-4">
+            <a th:href="@{/ads/create}" sec:authorize="isAuthenticated()" class="btn-sell d-inline-flex" style="font-size:16px;padding:10px 28px;">
+                <i class="bi bi-plus-circle-fill me-2"></i> Start Selling for FREE
+            </a>
+            <a th:href="@{/auth/register}" sec:authorize="!isAuthenticated()" class="btn-sell d-inline-flex" style="font-size:16px;padding:10px 28px;">
+                <i class="bi bi-plus-circle-fill me-2"></i> Start Selling for FREE
+            </a>
+        </div>
     </div>
 </section>
 
 <!-- Categories Section -->
-<section class="py-5">
+<section class="py-4" style="background:white;border-bottom:1px solid #e0e0e0;">
     <div class="container">
-        <h2 class="text-center mb-4">Browse by Category</h2>
+        <h2 class="section-title">Browse by Category</h2>
         <div class="row g-3">
             <div class="col-6 col-md-3 col-lg-2" th:each="cat : ${categories}">
-                <a th:href="@{/ads(categoryId=${cat.id})}" class="text-decoration-none">
-                    <div class="card h-100 text-center p-3 category-card hover-shadow">
-                        <div class="fs-1 mb-2" th:text="${cat.icon}">📦</div>
-                        <p class="mb-0 fw-medium" th:text="${cat.name}">Category</p>
-                    </div>
+                <a th:href="@{/ads(categoryId=${cat.id})}" class="category-card">
+                    <span class="cat-icon" th:text="${cat.icon}">📦</span>
+                    <span class="cat-name" th:text="${cat.name}">Category</span>
                 </a>
             </div>
         </div>
@@ -85,115 +98,120 @@
 </section>
 
 <!-- Featured Ads -->
-<section class="py-4 bg-light" th:if="${!#lists.isEmpty(featuredAds)}">
+<section class="py-4" th:if="${!#lists.isEmpty(featuredAds)}">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0"><i class="bi bi-star-fill text-warning me-2"></i>Featured Ads</h2>
-            <a th:href="@{/ads}" class="btn btn-outline-primary btn-sm">View All</a>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="section-title mb-0"><i class="bi bi-star-fill text-warning me-2"></i>Featured Ads</h2>
+            <a th:href="@{/ads}" class="btn btn-sm btn-outline-primary">View All &rarr;</a>
         </div>
         <div class="row g-3">
-            <div class="col-md-6 col-lg-3" th:each="ad : ${featuredAds}">
-                <div class="card h-100 ad-card">
+            <div class="col-6 col-md-4 col-lg-3" th:each="ad : ${featuredAds}">
+                <a th:href="@{/ads/{id}(id=${ad.id})}" class="ad-card">
                     <div class="position-relative">
-                        <img th:src="${!#lists.isEmpty(ad.images) ? ad.images[0] : '/images/placeholder.jpg'}"
-                             class="card-img-top ad-thumb" alt="Ad Image"
+                        <img th:src="${!#lists.isEmpty(ad.images) ? ad.images[0] : 'https://via.placeholder.com/300x200?text=No+Image'}"
+                             class="ad-thumb" alt="Ad Image"
                              onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
-                        <span class="badge bg-warning position-absolute top-0 end-0 m-2">Featured</span>
+                        <span class="ad-badge-featured">⭐ Featured</span>
                     </div>
-                    <div class="card-body">
-                        <h6 class="card-title text-truncate" th:text="${ad.title}">Title</h6>
-                        <p class="text-primary fw-bold mb-1">
-                            $<span th:text="${#numbers.formatDecimal(ad.price, 1, 2)}">0.00</span>
-                        </p>
-                        <small class="text-muted">
-                            <i class="bi bi-geo-alt me-1"></i>
-                            <span th:text="${ad.location?.city}">City</span>
-                        </small>
+                    <div class="ad-body">
+                        <div class="ad-price">₹ <span th:text="${#numbers.formatDecimal(ad.price, 1, 0)}">0</span></div>
+                        <div class="ad-title" th:text="${ad.title}">Title</div>
+                        <div class="ad-meta">
+                            <span><i class="bi bi-geo-alt"></i> <span th:text="${ad.location?.city}">City</span></span>
+                            <span th:text="${#temporals.format(ad.createdAt, 'MMM dd')}">Date</span>
+                        </div>
                     </div>
-                    <div class="card-footer bg-transparent">
-                        <a th:href="@{/ads/{id}(id=${ad.id})}" class="btn btn-primary btn-sm w-100">View Details</a>
-                    </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Recent Ads -->
-<section class="py-5">
+<!-- Fresh Recommendations -->
+<section class="py-4" style="background:#f7f8fa;">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Recent Ads</h2>
-            <a th:href="@{/ads}" class="btn btn-outline-primary btn-sm">View All</a>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="section-title mb-0">Fresh Recommendations</h2>
+            <a th:href="@{/ads}" class="btn btn-sm btn-outline-primary">View All &rarr;</a>
         </div>
+
         <div class="row g-3" th:if="${!#lists.isEmpty(recentAds)}">
-            <div class="col-md-6 col-lg-3" th:each="ad : ${recentAds}">
-                <div class="card h-100 ad-card">
-                    <img th:src="${!#lists.isEmpty(ad.images) ? ad.images[0] : '/images/placeholder.jpg'}"
-                         class="card-img-top ad-thumb" alt="Ad Image"
-                         onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
-                    <div class="card-body">
-                        <h6 class="card-title text-truncate" th:text="${ad.title}">Title</h6>
-                        <p class="text-primary fw-bold mb-1">
-                            $<span th:text="${#numbers.formatDecimal(ad.price, 1, 2)}">0.00</span>
-                            <small class="text-muted fw-normal" th:if="${ad.negotiable}"> (Negotiable)</small>
-                        </p>
-                        <small class="text-muted">
-                            <i class="bi bi-geo-alt me-1"></i>
-                            <span th:text="${ad.location?.city}">City</span>
-                        </small>
+            <div class="col-6 col-md-4 col-lg-3" th:each="ad : ${recentAds}">
+                <a th:href="@{/ads/{id}(id=${ad.id})}" class="ad-card">
+                    <div class="position-relative">
+                        <img th:src="${!#lists.isEmpty(ad.images) ? ad.images[0] : 'https://via.placeholder.com/300x200?text=No+Image'}"
+                             class="ad-thumb" alt="Ad Image"
+                             onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                        <span th:if="${ad.condition != null}" class="ad-badge-condition" th:text="${ad.condition}">Condition</span>
                     </div>
-                    <div class="card-footer bg-transparent">
-                        <a th:href="@{/ads/{id}(id=${ad.id})}" class="btn btn-outline-primary btn-sm w-100">View Details</a>
+                    <div class="ad-body">
+                        <div class="ad-price">
+                            ₹ <span th:text="${#numbers.formatDecimal(ad.price, 1, 0)}">0</span>
+                            <small class="text-muted fw-normal" style="font-size:11px;" th:if="${ad.negotiable}"> • Negotiable</small>
+                        </div>
+                        <div class="ad-title" th:text="${ad.title}">Title</div>
+                        <div class="ad-meta">
+                            <span><i class="bi bi-geo-alt"></i> <span th:text="${ad.location?.city}">City</span></span>
+                            <span th:text="${#temporals.format(ad.createdAt, 'MMM dd')}">Date</span>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
+
         <div th:if="${#lists.isEmpty(recentAds)}" class="text-center py-5">
             <i class="bi bi-inbox display-4 text-muted"></i>
-            <p class="text-muted mt-3">No ads available yet. Be the first to post!</p>
-            <a th:href="@{/ads/create}" class="btn btn-primary">Post an Ad</a>
+            <p class="text-muted mt-3">No ads yet. Be the first to post!</p>
+            <a th:href="@{/ads/create}" class="btn-sell d-inline-flex">
+                <i class="bi bi-plus-circle-fill me-2"></i>Post Your First Ad
+            </a>
         </div>
     </div>
 </section>
 
 <!-- CTA Section -->
-<section class="bg-primary text-white py-5">
+<section style="background:var(--olx-teal);padding:48px 0;">
     <div class="container text-center">
-        <h2 class="mb-3">Ready to Sell?</h2>
-        <p class="lead mb-4">Post your first ad for free and reach thousands of buyers</p>
-        <a th:href="@{/ads/create}" class="btn btn-warning btn-lg fw-bold">
-            <i class="bi bi-plus-circle me-2"></i>Post Your Ad Now
+        <h2 style="color:white;font-weight:800;margin-bottom:12px;">Ready to Sell Something?</h2>
+        <p style="color:rgba(255,255,255,0.8);margin-bottom:24px;">Post your ad for FREE and reach millions of buyers nearby</p>
+        <a th:href="@{/ads/create}" sec:authorize="isAuthenticated()" class="btn-sell" style="font-size:16px;padding:12px 32px;">
+            <i class="bi bi-plus-circle-fill me-2"></i> Post Your Ad Now
+        </a>
+        <a th:href="@{/auth/register}" sec:authorize="!isAuthenticated()" class="btn-sell" style="font-size:16px;padding:12px 32px;">
+            <i class="bi bi-plus-circle-fill me-2"></i> Post Your Ad Now
         </a>
     </div>
 </section>
 
 <!-- Footer -->
-<footer class="bg-dark text-light py-4 mt-0">
+<footer class="olx-footer">
     <div class="container">
         <div class="row">
-            <div class="col-md-4">
-                <h5><i class="bi bi-grid-3x3-gap-fill me-2"></i>ClassifiedAds</h5>
-                <p class="text-muted small">Your trusted marketplace for buying and selling locally.</p>
+            <div class="col-md-4 mb-3">
+                <div class="footer-brand">OLXAds</div>
+                <p style="color:rgba(255,255,255,0.6);font-size:13px;margin-top:8px;">Your trusted marketplace for buying and selling locally. 100% Free.</p>
             </div>
-            <div class="col-md-4">
-                <h6>Quick Links</h6>
-                <ul class="list-unstyled small">
-                    <li><a th:href="@{/}" class="text-muted text-decoration-none">Home</a></li>
-                    <li><a th:href="@{/ads}" class="text-muted text-decoration-none">Browse Ads</a></li>
-                    <li><a th:href="@{/ads/create}" class="text-muted text-decoration-none">Post Ad</a></li>
-                </ul>
+            <div class="col-md-2 mb-3">
+                <h6>Browse</h6>
+                <a th:href="@{/}">Home</a>
+                <a th:href="@{/ads}">All Ads</a>
+                <a th:href="@{/ads/create}">Post Ad</a>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2 mb-3">
+                <h6>Account</h6>
+                <a th:href="@{/auth/login}" sec:authorize="!isAuthenticated()">Login</a>
+                <a th:href="@{/auth/register}" sec:authorize="!isAuthenticated()">Register</a>
+                <a th:href="@{/user/dashboard}" sec:authorize="isAuthenticated()">Dashboard</a>
+                <a th:href="@{/user/favorites}" sec:authorize="isAuthenticated()">Saved Ads</a>
+            </div>
+            <div class="col-md-2 mb-3">
                 <h6>Developer</h6>
-                <ul class="list-unstyled small">
-                    <li><a th:href="@{/swagger-ui.html}" class="text-muted text-decoration-none">API Docs</a></li>
-                    <li><a th:href="@{/v3/api-docs}" class="text-muted text-decoration-none">OpenAPI Spec</a></li>
-                </ul>
+                <a th:href="@{/swagger-ui.html}" target="_blank">API Docs</a>
+                <a th:href="@{/v3/api-docs}" target="_blank">OpenAPI</a>
             </div>
         </div>
-        <hr class="text-muted">
-        <p class="text-center text-muted mb-0 small">&copy; 2024 ClassifiedAds. All rights reserved.</p>
+        <hr>
+        <p class="footer-bottom text-center mb-0">&copy; 2024 OLXAds. All rights reserved. | Buy &amp; Sell Locally for FREE</p>
     </div>
 </footer>
 

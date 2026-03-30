@@ -4,118 +4,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - ClassifiedAds</title>
+    <title>Admin Dashboard - OLXAds</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link th:href="@{/css/custom.css}" rel="stylesheet">
 </head>
-<body>
-<nav class="navbar navbar-dark bg-dark sticky-top">
+<body style="background:#f7f8fa;">
+
+<div id="alertContainer"></div>
+
+<nav class="navbar navbar-dark sticky-top" style="background:#1a1a2e;border-bottom:3px solid #ffce32;padding:8px 0;">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="bi bi-shield-check me-2"></i>Admin Panel</a>
-        <ul class="navbar-nav ms-auto flex-row gap-3">
-            <li class="nav-item"><a class="nav-link" th:href="@{/admin/users}">Users</a></li>
-            <li class="nav-item"><a class="nav-link" th:href="@{/admin/ads}">Ads</a></li>
-            <li class="nav-item"><a class="nav-link" th:href="@{/admin/reports}">Reports</a></li>
-            <li class="nav-item"><a class="nav-link" th:href="@{/}">Site</a></li>
-            <li class="nav-item"><button class="btn btn-outline-light btn-sm" onclick="logout()">Logout</button></li>
+        <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}">
+            <i class="bi bi-shield-check me-2" style="color:#ffce32;"></i>
+            <span style="color:#ffce32;">Admin</span><span style="color:white;"> Panel</span>
+        </a>
+        <ul class="navbar-nav ms-auto flex-row gap-3 align-items-center">
+            <li class="nav-item"><a class="nav-link text-white" th:href="@{/admin/users}"><i class="bi bi-people me-1"></i>Users</a></li>
+            <li class="nav-item"><a class="nav-link text-white" th:href="@{/admin/ads}"><i class="bi bi-megaphone me-1"></i>Ads</a></li>
+            <li class="nav-item"><a class="nav-link text-white" th:href="@{/admin/reports}"><i class="bi bi-flag me-1"></i>Reports</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/}" style="color:rgba(255,255,255,0.6);">Site</a></li>
+            <li class="nav-item"><button class="btn btn-sm btn-outline-light" onclick="logout()">Logout</button></li>
         </ul>
     </div>
 </nav>
 
 <div class="container py-4">
-    <h2 class="mb-4">Admin Dashboard</h2>
-    <div id="alertContainer"></div>
+    <h2 style="font-weight:700;margin-bottom:4px;">Admin Dashboard</h2>
+    <p style="color:#888;margin-bottom:24px;">Overview of platform activity</p>
 
-    <!-- Stats Cards (loaded via JS) -->
-    <div class="row g-4 mb-5" id="statsCards">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6>Total Users</h6>
-                            <h2 id="totalUsers">-</h2>
-                        </div>
-                        <i class="bi bi-people display-4 opacity-50"></i>
-                    </div>
-                </div>
-                <div class="card-footer border-0 bg-transparent">
-                    <a th:href="@{/admin/users}" class="text-white small">View all &rarr;</a>
-                </div>
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4" id="statsCards">
+        <div class="col-6 col-md-3">
+            <div style="background:white;border-radius:10px;border:1px solid #e0e0e0;padding:20px;border-left:4px solid #002f34;">
+                <p style="font-size:12px;color:#888;margin-bottom:4px;text-transform:uppercase;">Total Users</p>
+                <h2 style="font-weight:800;margin:0;color:#002f34;" id="totalUsers">-</h2>
+                <a th:href="@{/admin/users}" style="font-size:12px;color:#002f34;text-decoration:none;">View all &rarr;</a>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6>Active Ads</h6>
-                            <h2 id="activeAds">-</h2>
-                        </div>
-                        <i class="bi bi-megaphone display-4 opacity-50"></i>
-                    </div>
-                </div>
-                <div class="card-footer border-0 bg-transparent">
-                    <a th:href="@{/admin/ads}" class="text-white small">Manage &rarr;</a>
-                </div>
+        <div class="col-6 col-md-3">
+            <div style="background:white;border-radius:10px;border:1px solid #e0e0e0;padding:20px;border-left:4px solid #198754;">
+                <p style="font-size:12px;color:#888;margin-bottom:4px;text-transform:uppercase;">Active Ads</p>
+                <h2 style="font-weight:800;margin:0;color:#198754;" id="activeAds">-</h2>
+                <a th:href="@{/admin/ads}" style="font-size:12px;color:#198754;text-decoration:none;">Manage &rarr;</a>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6>Pending Ads</h6>
-                            <h2 id="pendingAds">-</h2>
-                        </div>
-                        <i class="bi bi-clock display-4 opacity-50"></i>
-                    </div>
-                </div>
-                <div class="card-footer border-0 bg-transparent">
-                    <a th:href="@{/admin/ads}" class="text-white small">Review &rarr;</a>
-                </div>
+        <div class="col-6 col-md-3">
+            <div style="background:white;border-radius:10px;border:1px solid #e0e0e0;padding:20px;border-left:4px solid #f59e0b;">
+                <p style="font-size:12px;color:#888;margin-bottom:4px;text-transform:uppercase;">Pending Ads</p>
+                <h2 style="font-weight:800;margin:0;color:#f59e0b;" id="pendingAds">-</h2>
+                <a th:href="@{/admin/ads}" style="font-size:12px;color:#f59e0b;text-decoration:none;">Review &rarr;</a>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6>Pending Reports</h6>
-                            <h2 id="pendingReports">-</h2>
-                        </div>
-                        <i class="bi bi-flag display-4 opacity-50"></i>
-                    </div>
-                </div>
-                <div class="card-footer border-0 bg-transparent">
-                    <a th:href="@{/admin/reports}" class="text-white small">View &rarr;</a>
-                </div>
+        <div class="col-6 col-md-3">
+            <div style="background:white;border-radius:10px;border:1px solid #e0e0e0;padding:20px;border-left:4px solid #dc3545;">
+                <p style="font-size:12px;color:#888;margin-bottom:4px;text-transform:uppercase;">Pending Reports</p>
+                <h2 style="font-weight:800;margin:0;color:#dc3545;" id="pendingReports">-</h2>
+                <a th:href="@{/admin/reports}" style="font-size:12px;color:#dc3545;text-decoration:none;">View &rarr;</a>
             </div>
         </div>
     </div>
 
+    <!-- Quick Actions -->
     <div class="row g-4">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <h6 class="mb-0">Quick Actions</h6>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a th:href="@{/admin/ads}" class="btn btn-outline-warning">
-                            <i class="bi bi-clock me-2"></i>Review Pending Ads
-                        </a>
-                        <a th:href="@{/admin/users}" class="btn btn-outline-primary">
-                            <i class="bi bi-people me-2"></i>Manage Users
-                        </a>
-                        <a th:href="@{/admin/reports}" class="btn btn-outline-danger">
-                            <i class="bi bi-flag me-2"></i>View Reports
-                        </a>
-                        <a th:href="@{/swagger-ui.html}" class="btn btn-outline-secondary" target="_blank">
-                            <i class="bi bi-code me-2"></i>API Documentation
-                        </a>
-                    </div>
+            <div style="background:white;border-radius:10px;border:1px solid #e0e0e0;padding:20px;">
+                <h5 style="font-weight:700;margin-bottom:16px;">⚡ Quick Actions</h5>
+                <div class="d-grid gap-2">
+                    <a th:href="@{/admin/ads}" class="btn btn-outline-warning fw-semibold">
+                        <i class="bi bi-clock me-2"></i>Review Pending Ads
+                    </a>
+                    <a th:href="@{/admin/users}" class="btn btn-outline-primary fw-semibold">
+                        <i class="bi bi-people me-2"></i>Manage Users
+                    </a>
+                    <a th:href="@{/admin/reports}" class="btn btn-outline-danger fw-semibold">
+                        <i class="bi bi-flag me-2"></i>View Reports
+                    </a>
+                    <a th:href="@{/swagger-ui.html}" class="btn btn-outline-secondary" target="_blank">
+                        <i class="bi bi-code me-2"></i>API Documentation
+                    </a>
                 </div>
             </div>
         </div>
@@ -127,15 +94,22 @@
 <script>
 async function loadDashboardStats() {
     const token = localStorage.getItem('jwt_token');
-    const res = await fetch('/api/admin/dashboard', {
-        headers: { 'Authorization': 'Bearer ' + token }
-    });
-    if (res.ok) {
-        const data = await res.json();
-        document.getElementById('totalUsers').textContent = data.totalUsers;
-        document.getElementById('activeAds').textContent = data.activeAds;
-        document.getElementById('pendingAds').textContent = data.pendingAds;
-        document.getElementById('pendingReports').textContent = data.pendingReports;
+    if (!token) { window.location.href = '/auth/login'; return; }
+    try {
+        const res = await fetch('/api/admin/dashboard', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('totalUsers').textContent = data.totalUsers ?? '-';
+            document.getElementById('activeAds').textContent = data.activeAds ?? '-';
+            document.getElementById('pendingAds').textContent = data.pendingAds ?? '-';
+            document.getElementById('pendingReports').textContent = data.pendingReports ?? '-';
+        } else if (res.status === 401 || res.status === 403) {
+            showAlert('danger', '❌ Access denied. Admin privileges required.');
+        }
+    } catch (e) {
+        showAlert('warning', '⚠️ Could not load dashboard stats. Please refresh.');
     }
 }
 loadDashboardStats();
