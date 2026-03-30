@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Ads - ClassifiedAds</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="bi bi-grid-3x3-gap-fill me-2"></i>ClassifiedAds</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <form class="d-flex mx-auto" style="width: 40%;" th:action="@{/ads}" method="get">
+                <input class="form-control me-2" type="search" name="keyword" placeholder="Search ads..."
+                       th:value="${keyword}">
+                <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link" th:href="@{/ads}">Browse Ads</a></li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/ads/create}"><i class="bi bi-plus-circle me-1"></i>Post Ad</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/user/dashboard}"><i class="bi bi-person-circle me-1"></i>Dashboard</a>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/auth/login}">Login</a>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="btn btn-outline-light btn-sm ms-1" th:href="@{/auth/register}">Register</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <button class="btn btn-outline-light btn-sm ms-1" onclick="logout()">Logout</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="bi bi-funnel me-2"></i>Filters</h6>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/ads}" method="get" id="filterForm">
+                        <input type="hidden" name="keyword" th:value="${keyword}">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Category</label>
+                            <select class="form-select" name="categoryId" onchange="this.form.submit()">
+                                <option value="">All Categories</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.id}"
+                                        th:text="${cat.name}"
+                                        th:selected="${cat.id == selectedCategory}">Category</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        <a th:href="@{/ads}" class="btn btn-outline-secondary w-100 mt-2">Clear All</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ads Grid -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="mb-0" th:if="${keyword != null and !#strings.isEmpty(keyword)}">
+                        Results for "<span th:text="${keyword}"></span>"
+                    </h5>
+                    <h5 class="mb-0" th:unless="${keyword != null and !#strings.isEmpty(keyword)}">All Ads</h5>
+                    <small class="text-muted" th:text="${ads.totalElements + ' ads found'}">0 ads found</small>
+                </div>
+                <a th:href="@{/ads/create}" class="btn btn-primary btn-sm" sec:authorize="isAuthenticated()">
+                    <i class="bi bi-plus-circle me-1"></i>Post Ad
+                </a>
+            </div>
+
+            <div class="row g-3" th:if="${!#lists.isEmpty(ads.content)}">
+                <div class="col-md-6 col-lg-4" th:each="ad : ${ads.content}">
+                    <div class="card h-100 ad-card">
+                        <div class="position-relative">
+                            <img th:src="${!#lists.isEmpty(ad.images) ? ad.images[0] : '/images/placeholder.jpg'}"
+                                 class="card-img-top ad-thumb" alt="Ad"
+                                 onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                            <span th:if="${ad.featured}" class="badge bg-warning position-absolute top-0 end-0 m-2">Featured</span>
+                            <span th:if="${ad.condition != null}" 
+                                  th:text="${ad.condition}"
+                                  class="badge bg-info position-absolute top-0 start-0 m-2">Condition</span>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-truncate" th:text="${ad.title}">Title</h6>
+                            <p class="text-primary fw-bold mb-1">
+                                $<span th:text="${#numbers.formatDecimal(ad.price, 1, 2)}">0.00</span>
+                                <small class="text-muted fw-normal" th:if="${ad.negotiable}"> (Negotiable)</small>
+                            </p>
+                            <small class="text-muted d-block">
+                                <i class="bi bi-geo-alt me-1"></i>
+                                <span th:text="${ad.location?.city + ', ' + ad.location?.state}">Location</span>
+                            </small>
+                            <small class="text-muted">
+                                <i class="bi bi-eye me-1"></i><span th:text="${ad.views}">0</span> views
+                            </small>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a th:href="@{/ads/{id}(id=${ad.id})}" class="btn btn-outline-primary btn-sm w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(ads.content)}" class="text-center py-5">
+                <i class="bi bi-search display-4 text-muted"></i>
+                <p class="text-muted mt-3">No ads found. Try different search terms.</p>
+                <a th:href="@{/ads}" class="btn btn-outline-primary">Clear Search</a>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${ads.totalPages > 1}" class="mt-4" aria-label="Ad listing pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${ads.first ? 'disabled' : ''}">
+                        <a class="page-link"
+                           th:href="@{/ads(page=${ads.page - 1}, keyword=${keyword}, categoryId=${selectedCategory})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, ads.totalPages - 1)}"
+                        class="page-item" th:classappend="${i == ads.page ? 'active' : ''}">
+                        <a class="page-link"
+                           th:href="@{/ads(page=${i}, keyword=${keyword}, categoryId=${selectedCategory})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${ads.last ? 'disabled' : ''}">
+                        <a class="page-link"
+                           th:href="@{/ads(page=${ads.page + 1}, keyword=${keyword}, categoryId=${selectedCategory})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-dark text-light py-3 mt-5">
+    <div class="container text-center">
+        <p class="mb-0 small text-muted">&copy; 2024 ClassifiedAds. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

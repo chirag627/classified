@@ -1,0 +1,190 @@
+/* Custom CSS for ClassifiedAds */
+
+:root {
+    --primary: #0d6efd;
+    --primary-dark: #0a58ca;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    padding: 80px 0;
+}
+
+/* Category Cards */
+.category-card {
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.category-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.15);
+    color: var(--primary);
+}
+
+/* Ad Cards */
+.ad-card {
+    transition: all 0.2s ease;
+    border: 1px solid #e9ecef;
+}
+
+.ad-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: #dee2e6;
+}
+
+.ad-thumb {
+    height: 200px;
+    object-fit: cover;
+    background-color: #f0f0f0;
+}
+
+/* Hover shadow utility */
+.hover-shadow {
+    transition: box-shadow 0.2s ease;
+}
+.hover-shadow:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar */
+.navbar-brand {
+    font-size: 1.4rem;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+}
+
+/* Forms */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Image Upload Preview */
+.image-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.image-preview img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #dee2e6;
+}
+
+.image-preview .remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: white;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Chat styles */
+#messagesContainer {
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+/* Admin sidebar */
+.admin-sidebar .list-group-item.active {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: var(--primary);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Alert container */
+#alertContainer .alert {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Price display */
+.price-display {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* Status badges */
+.status-active { background-color: #198754; }
+.status-pending { background-color: #ffc107; color: #000; }
+.status-rejected { background-color: #dc3545; }
+.status-expired { background-color: #6c757d; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 40px 0;
+    }
+    .hero-section h1 {
+        font-size: 1.8rem;
+    }
+    .ad-thumb {
+        height: 160px;
+    }
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Loading spinner overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* Dashboard stat cards */
+.stat-card {
+    border-left: 4px solid var(--primary);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateX(4px);
+}

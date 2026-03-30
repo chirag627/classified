@@ -1,0 +1,36 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/classified}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+      enabled: true
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:classified-app-super-secret-key-must-be-at-least-256-bits-long-for-hs256}
+    expiration: 86400000
+  upload:
+    dir: ${UPLOAD_DIR:uploads}
+
+server:
+  port: ${PORT:8080}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+logging:
+  level:
+    com.classified: DEBUG
+    org.springframework.security: INFO
