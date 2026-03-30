@@ -13,6 +13,7 @@ function logout() {
     localStorage.removeItem('user_id');
     localStorage.removeItem('user_name');
     localStorage.removeItem('user_roles');
+    document.cookie = "JWT_TOKEN=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict";
     window.location.href = '/auth/login';
 }
 

@@ -5,7 +5,7 @@ services:
     build: .
     container_name: classified-app
     ports:
-      - "8080:8080"
+      - "3000:8080"
     environment:
       - MONGODB_URI=mongodb://mongo:27017/classified
       - JWT_SECRET=classified-app-super-secret-key-must-be-at-least-256-bits-long-for-hs256

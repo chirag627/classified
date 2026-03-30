@@ -2,6 +2,7 @@ package com.classified.app.config;
 
 import com.classified.app.security.JwtAuthenticationFilter;
 import com.classified.app.security.UserDetailsServiceImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,22 @@ public class SecurityConfig {
                                 "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
                         .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            if (request.getRequestURI().startsWith("/api/")) {
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                            } else {
+                                response.sendRedirect("/auth/login");
+                            }
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            if (request.getRequestURI().startsWith("/api/")) {
+                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                            } else {
+                                response.sendRedirect("/auth/login");
+                            }
+                        })
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
