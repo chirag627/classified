@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ClassifiedAds</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">
+            <i class="bi bi-grid-3x3-gap-fill me-2"></i>ClassifiedAds
+        </a>
+    </div>
+</nav>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-circle display-4 text-primary"></i>
+                        <h3 class="mt-2">Welcome Back</h3>
+                        <p class="text-muted">Sign in to your account</p>
+                    </div>
+                    <div id="alertContainer"></div>
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" required
+                                       placeholder="your@email.com">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="password" required
+                                       placeholder="Your password">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                        </button>
+                    </form>
+                    <hr>
+                    <p class="text-center mb-0">
+                        Don't have an account?
+                        <a th:href="@{/auth/register}" class="text-primary fw-medium">Register here</a>
+                    </p>
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <small class="text-muted">
+                            <strong>Demo Credentials:</strong><br>
+                            Admin: admin@classified.com / admin123<br>
+                            User: alice@example.com / password123
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = {
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+    };
+    try {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (res.ok) {
+            const result = await res.json();
+            localStorage.setItem('jwt_token', result.token);
+            localStorage.setItem('user_id', result.id);
+            localStorage.setItem('user_name', result.name);
+            localStorage.setItem('user_roles', JSON.stringify(result.roles));
+            showAlert('success', 'Login successful! Redirecting...');
+            const roles = result.roles;
+            setTimeout(() => {
+                if (roles && roles.includes('ADMIN')) {
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    window.location.href = '/user/dashboard';
+                }
+            }, 1000);
+        } else {
+            const err = await res.json();
+            showAlert('danger', err.error || 'Invalid email or password.');
+        }
+    } catch (err) {
+        showAlert('danger', 'Connection error. Please try again.');
+    }
+});
+</script>
+</body>
+</html>

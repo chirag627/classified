@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post New Ad - ClassifiedAds</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"><i class="bi bi-grid-3x3-gap-fill me-2"></i>ClassifiedAds</a>
+        <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item"><a class="nav-link" th:href="@{/user/dashboard}">Dashboard</a></li>
+            <li class="nav-item"><button class="btn btn-outline-light btn-sm ms-1" onclick="logout()">Logout</button></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="mb-4"><i class="bi bi-plus-circle me-2"></i>Post New Ad</h2>
+            <div id="alertContainer"></div>
+
+            <form id="createAdForm">
+                <div class="card mb-4">
+                    <div class="card-header"><h6 class="mb-0">Basic Information</h6></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" required
+                                   placeholder="What are you selling?">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Category *</label>
+                            <select class="form-select" id="categoryId" name="categoryId" required>
+                                <option value="">Select a category</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Category</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required
+                                      placeholder="Describe your item in detail..."></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">Condition</label>
+                                <select class="form-select" id="condition" name="condition">
+                                    <option value="">Select condition</option>
+                                    <option value="NEW">New</option>
+                                    <option value="USED">Used</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">Price ($) *</label>
+                                <input type="number" class="form-control" id="price" name="price" required
+                                       min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="negotiable" name="negotiable">
+                            <label class="form-check-label" for="negotiable">Price is negotiable</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header"><h6 class="mb-0">Images</h6></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Upload Images (Max 5, 10MB each)</label>
+                            <input type="file" class="form-control" id="imageFiles" accept="image/*" multiple>
+                        </div>
+                        <div id="imagePreviewContainer" class="row g-2 mt-2"></div>
+                        <input type="hidden" id="uploadedImages" name="uploadedImages">
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header"><h6 class="mb-0">Location</h6></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">City</label>
+                                <input type="text" class="form-control" id="city" name="city" placeholder="City">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">State</label>
+                                <input type="text" class="form-control" id="state" name="state" placeholder="State">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle me-2"></i>Post Ad
+                    </button>
+                    <a th:href="@{/user/dashboard}" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+<script>
+document.getElementById('createAdForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const token = localStorage.getItem('jwt_token');
+    if (!token) { window.location.href = '/auth/login'; return; }
+
+    // Upload images first
+    const imageFiles = document.getElementById('imageFiles').files;
+    let imagePaths = [];
+    if (imageFiles.length > 0) {
+        const formData = new FormData();
+        for (let f of imageFiles) formData.append('files', f);
+        const uploadRes = await fetch('/api/ads/upload-images', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: formData
+        });
+        if (uploadRes.ok) imagePaths = await uploadRes.json();
+    }
+
+    const data = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        categoryId: document.getElementById('categoryId').value,
+        price: parseFloat(document.getElementById('price').value),
+        negotiable: document.getElementById('negotiable').checked,
+        condition: document.getElementById('condition').value || null,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        images: imagePaths
+    };
+
+    const res = await fetch('/api/ads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+        const ad = await res.json();
+        showAlert('success', 'Ad posted successfully! It is pending review.');
+        setTimeout(() => window.location.href = '/user/dashboard', 2000);
+    } else {
+        const err = await res.json();
+        showAlert('danger', err.error || 'Failed to post ad.');
+    }
+});
+
+document.getElementById('imageFiles').addEventListener('change', function() {
+    previewImages(this.files, 'imagePreviewContainer');
+});
+</script>
+</body>
+</html>

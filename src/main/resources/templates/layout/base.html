@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null ? pageTitle + ' - ClassifiedAds' : 'ClassifiedAds'}">ClassifiedAds</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">
+            <i class="bi bi-grid-3x3-gap-fill me-2"></i>ClassifiedAds
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <form class="d-flex mx-auto" style="width: 40%;" th:action="@{/ads}" method="get">
+                <input class="form-control me-2" type="search" name="keyword" placeholder="Search ads..." 
+                       aria-label="Search">
+                <button class="btn btn-outline-light" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/ads}">Browse Ads</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/ads/create}">
+                        <i class="bi bi-plus-circle me-1"></i>Post Ad
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/user/dashboard}">
+                        <i class="bi bi-person-circle me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link text-warning" th:href="@{/admin/dashboard}">
+                        <i class="bi bi-shield-check me-1"></i>Admin
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/auth/login}">Login</a>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="btn btn-outline-light btn-sm ms-1" th:href="@{/auth/register}">Register</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <button class="btn btn-outline-light btn-sm ms-1" onclick="logout()">Logout</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main>
+    <th:block th:replace="${content}"></th:block>
+</main>
+
+<!-- Footer -->
+<footer class="bg-dark text-light py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5><i class="bi bi-grid-3x3-gap-fill me-2"></i>ClassifiedAds</h5>
+                <p class="text-muted">Your trusted marketplace for buying and selling locally.</p>
+            </div>
+            <div class="col-md-4">
+                <h6>Quick Links</h6>
+                <ul class="list-unstyled">
+                    <li><a th:href="@{/}" class="text-muted text-decoration-none">Home</a></li>
+                    <li><a th:href="@{/ads}" class="text-muted text-decoration-none">Browse Ads</a></li>
+                    <li><a th:href="@{/ads/create}" class="text-muted text-decoration-none">Post Ad</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>API</h6>
+                <ul class="list-unstyled">
+                    <li><a th:href="@{/swagger-ui.html}" class="text-muted text-decoration-none">API Docs</a></li>
+                    <li><a th:href="@{/v3/api-docs}" class="text-muted text-decoration-none">OpenAPI Spec</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="text-muted">
+        <p class="text-center text-muted mb-0">&copy; 2024 ClassifiedAds. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
