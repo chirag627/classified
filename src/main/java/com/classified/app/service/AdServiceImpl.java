@@ -55,7 +55,7 @@ public class AdServiceImpl implements AdService {
                 .tags(request.getTags())
                 .condition(request.getCondition())
                 .userId(userId)
-                .status(Ad.AdStatus.PENDING)
+                .status(Ad.AdStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusDays(30))
