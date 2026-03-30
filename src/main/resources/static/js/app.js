@@ -1,5 +1,7 @@
 // OLXAds - Main Application JavaScript
 
+const MAX_UPLOAD_IMAGES = 5;
+
 // ===========================
 // Auth Utilities
 // ===========================
@@ -63,13 +65,13 @@ function previewImages(files, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
     container.innerHTML = '';
-    const maxFiles = 5;
-    const validFiles = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, maxFiles);
+    const maxFiles = MAX_UPLOAD_IMAGES;
+    const validFiles = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, MAX_UPLOAD_IMAGES);
     if (validFiles.length < files.length) {
         showAlert('warning', `⚠️ Only image files are accepted. Non-image files were skipped.`);
     }
-    if (files.length > maxFiles) {
-        showAlert('info', `ℹ️ Only the first ${maxFiles} images will be uploaded.`);
+    if (files.length > MAX_UPLOAD_IMAGES) {
+        showAlert('info', `ℹ️ Only the first ${MAX_UPLOAD_IMAGES} images will be uploaded.`);
     }
     validFiles.forEach((file, index) => {
         const reader = new FileReader();

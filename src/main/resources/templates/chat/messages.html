@@ -101,7 +101,7 @@ async function loadConversations() {
             const partnerId = m.senderId === currentUserId ? m.receiverId : m.senderId;
             const partnerName = m.senderId === currentUserId ? m.receiverName : m.senderName;
             if (!partners.has(partnerId)) {
-                partners.set(partnerId, { id: partnerId, name: partnerName, lastMessage: m.content, read: m.read });
+                partners.set(partnerId, { id: partnerId, name: partnerName, lastMessage: m.content });
             }
         });
         const container = document.getElementById('conversationsList');

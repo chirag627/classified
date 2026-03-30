@@ -52,7 +52,15 @@ public class AuthController {
             @PathVariable String id,
             @RequestBody Map<String, String> body,
             @AuthenticationPrincipal UserDetails userDetails) {
-        userService.updatePassword(id, body.get("oldPassword"), body.get("newPassword"));
+        String oldPassword = body.get("oldPassword");
+        String newPassword = body.get("newPassword");
+        if (oldPassword == null || oldPassword.isBlank() || newPassword == null || newPassword.isBlank()) {
+            throw new com.classified.app.exception.BadRequestException("Both old and new passwords are required");
+        }
+        if (newPassword.length() < 6) {
+            throw new com.classified.app.exception.BadRequestException("New password must be at least 6 characters long");
+        }
+        userService.updatePassword(id, oldPassword, newPassword);
         return ResponseEntity.ok().build();
     }
 }

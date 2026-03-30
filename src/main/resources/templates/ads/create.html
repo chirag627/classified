@@ -155,8 +155,10 @@ document.getElementById('uploadArea').addEventListener('dragleave', e => {
 document.getElementById('uploadArea').addEventListener('drop', e => {
     e.preventDefault();
     e.currentTarget.style.borderColor = '#ccc';
-    document.getElementById('imageFiles').files = e.dataTransfer.files;
-    previewImages(e.dataTransfer.files, 'imagePreviewContainer');
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles && droppedFiles.length > 0) {
+        previewImages(droppedFiles, 'imagePreviewContainer');
+    }
 });
 
 document.getElementById('imageFiles').addEventListener('change', function() {
