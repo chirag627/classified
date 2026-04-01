@@ -1,6 +1,5 @@
 package com.classified.app.service;
 
-import com.classified.app.dto.request.LoginRequest;
 import com.classified.app.dto.request.RegisterRequest;
 import com.classified.app.dto.response.AuthResponse;
 import com.classified.app.dto.response.UserResponse;
@@ -14,11 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -42,7 +36,10 @@ class UserServiceTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Mock
-    private AuthenticationManager authenticationManager;
+    private com.classified.app.repository.PhoneOtpRepository phoneOtpRepository;
+
+    @Mock
+    private com.classified.app.client.AuthServiceClient authServiceClient;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -69,18 +66,15 @@ class UserServiceTest {
     void register_newUser_returnsUserResponse() {
         RegisterRequest request = new RegisterRequest();
         request.setName("New User");
-        request.setEmail("new@test.com");
-        request.setPassword("password123");
+        request.setPhone("9876543210");
         request.setCity("Chicago");
         request.setState("IL");
 
-        when(userRepository.existsByEmail("new@test.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encoded_pw");
+        when(userRepository.existsByPhone("9876543210")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(User.builder()
                 .id("newUser1")
                 .name("New User")
-                .email("new@test.com")
-                .password("encoded_pw")
+                .phone("9876543210")
                 .roles(Set.of("USER"))
                 .active(true)
                 .createdAt(LocalDateTime.now())
@@ -89,48 +83,42 @@ class UserServiceTest {
         UserResponse result = userService.register(request);
 
         assertThat(result).isNotNull();
-        assertThat(result.getEmail()).isEqualTo("new@test.com");
+        assertThat(result.getPhone()).isEqualTo("9876543210");
         assertThat(result.getName()).isEqualTo("New User");
         verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
-    void register_existingEmail_throwsBadRequestException() {
+    void register_existingPhone_throwsBadRequestException() {
         RegisterRequest request = new RegisterRequest();
-        request.setEmail("existing@test.com");
+        request.setPhone("9876543210");
         request.setName("User");
-        request.setPassword("password");
 
-        when(userRepository.existsByEmail("existing@test.com")).thenReturn(true);
+        when(userRepository.existsByPhone("9876543210")).thenReturn(true);
 
         assertThatThrownBy(() -> userService.register(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("already in use");
+                .hasMessageContaining("already registered");
     }
 
     @Test
-    void login_validCredentials_returnsAuthResponse() {
-        LoginRequest request = new LoginRequest();
-        request.setEmail("test@test.com");
-        request.setPassword("password123");
+    void sendLoginOtp_existingPhone_sendsOtp() {
+        when(userRepository.findByPhone("9945601803")).thenReturn(Optional.of(testUser));
+        when(authServiceClient.sendOtp("91", "9945601803")).thenReturn("ver123");
 
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                "user1", "encoded_password",
-                List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        userService.sendLoginOtp("9945601803", "91");
 
-        Authentication auth = mock(Authentication.class);
-        when(auth.getPrincipal()).thenReturn(userDetails);
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(auth);
-        when(userRepository.findById("user1")).thenReturn(Optional.of(testUser));
-        when(jwtTokenProvider.generateToken("user1", testUser.getRoles())).thenReturn("test_jwt_token");
+        verify(phoneOtpRepository).deleteByUserId("user1");
+        verify(phoneOtpRepository).save(any());
+    }
 
-        AuthResponse result = userService.login(request);
+    @Test
+    void sendLoginOtp_unknownPhone_throwsBadRequest() {
+        when(userRepository.findByPhone("0000000000")).thenReturn(Optional.empty());
 
-        assertThat(result).isNotNull();
-        assertThat(result.getToken()).isEqualTo("test_jwt_token");
-        assertThat(result.getId()).isEqualTo("user1");
-        assertThat(result.getEmail()).isEqualTo("test@test.com");
+        assertThatThrownBy(() -> userService.sendLoginOtp("0000000000", "91"))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("No account found");
     }
 
     @Test

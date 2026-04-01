@@ -27,6 +27,9 @@ public class Ad {
     private String subcategoryId;
     private Double price;
     private boolean negotiable;
+    
+    @Builder.Default
+    private boolean hidePrice = false;
 
     @Builder.Default
     private List<String> images = new ArrayList<>();
@@ -47,6 +50,8 @@ public class Ad {
     @Builder.Default
     private boolean featured = false;
 
+    private Double boostAmount;
+    private Integer boostDays;
     private LocalDateTime boostExpiry;
 
     @Builder.Default

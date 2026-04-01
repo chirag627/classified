@@ -6,6 +6,7 @@ import com.classified.app.model.Category;
 import com.classified.app.service.AdService;
 import com.classified.app.service.CategoryService;
 import com.classified.app.service.FavoriteService;
+import com.classified.app.service.MessageService;
 import com.classified.app.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +25,7 @@ public class WebController {
     private final CategoryService categoryService;
     private final FavoriteService favoriteService;
     private final UserService userService;
+    private final MessageService messageService;
 
     @GetMapping({"/", "/index"})
     public String home(Model model) {
@@ -110,13 +112,18 @@ public class WebController {
         model.addAttribute("myAds", myAds);
         model.addAttribute("favorites", favorites);
         model.addAttribute("user", userService.getCurrentUser(userId));
+        model.addAttribute("unreadMessageCount", messageService.getUnreadCount(userId));
         return "user/dashboard";
     }
 
     @GetMapping("/user/profile")
-    public String profilePage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String profilePage(Model model, @AuthenticationPrincipal UserDetails userDetails,
+                              @RequestParam(required = false) Boolean emailVerified,
+                              @RequestParam(required = false) Boolean emailError) {
         if (userDetails == null) return "redirect:/auth/login";
         model.addAttribute("user", userService.getCurrentUser(userDetails.getUsername()));
+        if (Boolean.TRUE.equals(emailVerified)) model.addAttribute("emailVerified", true);
+        if (Boolean.TRUE.equals(emailError)) model.addAttribute("emailError", true);
         return "user/profile";
     }
 

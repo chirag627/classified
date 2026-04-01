@@ -18,7 +18,7 @@
 <nav class="navbar navbar-expand-lg olx-navbar sticky-top">
     <div class="container">
         <a class="navbar-brand" th:href="@{/}">
-            <span style="color:#ffce32;font-weight:900;font-size:1.5rem;letter-spacing:-1px;">OLX</span><span style="color:white;font-size:1.1rem;font-weight:600;">Ads</span>
+            <span style="color:#ffce32;font-weight:900;font-size:1.5rem;letter-spacing:-1px;">Oxxlo</span>
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -101,7 +101,7 @@
 <section class="py-4" th:if="${!#lists.isEmpty(featuredAds)}">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="section-title mb-0"><i class="bi bi-star-fill text-warning me-2"></i>Featured Ads</h2>
+            <h2 class="section-title mb-0"><i class="bi bi-rocket-takeoff-fill text-warning me-2"></i>Boosted & Featured Ads</h2>
             <a th:href="@{/ads}" class="btn btn-sm btn-outline-primary">View All &rarr;</a>
         </div>
         <div class="row g-3">
@@ -111,10 +111,12 @@
                         <img th:src="${!#lists.isEmpty(ad.images) ? ad.images[0] : 'https://via.placeholder.com/300x200?text=No+Image'}"
                              class="ad-thumb" alt="Ad Image"
                              onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
-                        <span class="ad-badge-featured">⭐ Featured</span>
+                        <span th:if="${ad.boosted}" class="ad-badge-featured" style="background:#ff9800;">🚀 Boosted</span>
+                        <span th:if="${!ad.boosted}" class="ad-badge-featured">⭐ Featured</span>
                     </div>
                     <div class="ad-body">
-                        <div class="ad-price">₹ <span th:text="${#numbers.formatDecimal(ad.price, 1, 0)}">0</span></div>
+                        <div class="ad-price" th:if="${!ad.hidePrice}">₹ <span th:text="${#numbers.formatDecimal(ad.price, 1, 0)}">0</span></div>
+                        <div class="ad-price" th:if="${ad.hidePrice}" style="font-size:0.95rem;color:#666;">Price on request</div>
                         <div class="ad-title" th:text="${ad.title}">Title</div>
                         <div class="ad-meta">
                             <span><i class="bi bi-geo-alt"></i> <span th:text="${ad.location?.city}">City</span></span>
@@ -145,10 +147,11 @@
                         <span th:if="${ad.condition != null}" class="ad-badge-condition" th:text="${ad.condition}">Condition</span>
                     </div>
                     <div class="ad-body">
-                        <div class="ad-price">
+                        <div class="ad-price" th:if="${!ad.hidePrice}">
                             ₹ <span th:text="${#numbers.formatDecimal(ad.price, 1, 0)}">0</span>
                             <small class="text-muted fw-normal" style="font-size:11px;" th:if="${ad.negotiable}"> • Negotiable</small>
                         </div>
+                        <div class="ad-price" th:if="${ad.hidePrice}" style="font-size:0.95rem;color:#666;">Price on request</div>
                         <div class="ad-title" th:text="${ad.title}">Title</div>
                         <div class="ad-meta">
                             <span><i class="bi bi-geo-alt"></i> <span th:text="${ad.location?.city}">City</span></span>
@@ -188,7 +191,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 mb-3">
-                <div class="footer-brand">OLXAds</div>
+                <div class="footer-brand">Oxxlo</div>
                 <p style="color:rgba(255,255,255,0.6);font-size:13px;margin-top:8px;">Your trusted marketplace for buying and selling locally. 100% Free.</p>
             </div>
             <div class="col-md-2 mb-3">
@@ -211,7 +214,7 @@
             </div>
         </div>
         <hr>
-        <p class="footer-bottom text-center mb-0">&copy; 2024 OLXAds. All rights reserved. | Buy &amp; Sell Locally for FREE</p>
+        <p class="footer-bottom text-center mb-0">&copy; 2024 Oxxlo. All rights reserved. | Buy &amp; Sell Locally for FREE</p>
     </div>
 </footer>
 

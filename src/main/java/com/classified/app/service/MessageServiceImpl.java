@@ -61,6 +61,17 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    public void markAsReadConversation(String userId, String otherUserId) {
+        List<Message> messages = messageRepository.findConversationBetweenUsers(userId, otherUserId);
+        messages.stream()
+                .filter(m -> m.getReceiverId().equals(userId) && !m.isRead())
+                .forEach(m -> {
+                    m.setRead(true);
+                    messageRepository.save(m);
+                });
+    }
+
+    @Override
     public long getUnreadCount(String userId) {
         return messageRepository.countByReceiverIdAndReadFalse(userId);
     }

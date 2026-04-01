@@ -1,4 +1,4 @@
-// OLXAds - Main Application JavaScript
+// Oxxlo - Main Application JavaScript
 
 const MAX_UPLOAD_IMAGES = 5;
 
@@ -123,6 +123,99 @@ async function deleteAd(adId) {
         }
     } catch (e) {
         showAlert('danger', '⚠️ Connection error. Please check your internet and try again.');
+    }
+}
+
+async function boostAdPlacement(adId) {
+    const token = getToken();
+    if (!token) {
+        showAlert('warning', '⚠️ Please log in to boost your ad.');
+        setTimeout(() => window.location.href = '/auth/login', 1000);
+        return;
+    }
+
+    const amountInput = prompt('Enter boost amount in ₹', '99');
+    if (amountInput === null) return;
+    const daysInput = prompt('Enter boost duration in days (1-30)', '7');
+    if (daysInput === null) return;
+
+    const amount = parseFloat(amountInput);
+    const days = parseInt(daysInput, 10);
+    if (Number.isNaN(amount) || amount <= 0 || Number.isNaN(days) || days <= 0 || days > 30) {
+        showAlert('warning', '⚠️ Please enter a valid amount and duration.');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/ads/' + adId + '/boost', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ amount, days })
+        });
+        if (res.ok) {
+            showAlert('success', `🚀 Ad boosted for ${days} day(s). It will now appear at the top.`);
+            setTimeout(() => location.reload(), 1200);
+        } else {
+            let errMsg = 'Failed to boost ad.';
+            try { const err = await res.json(); errMsg = err.error || errMsg; } catch(e) {}
+            showAlert('danger', '❌ ' + errMsg);
+        }
+    } catch (e) {
+        showAlert('danger', '⚠️ Connection error. Please try again.');
+    }
+}
+
+async function sendMessageToSeller() {
+    const token = getToken();
+    if (!token) {
+        showAlert('warning', '⚠️ Please log in to send a message.');
+        setTimeout(() => window.location.href = '/auth/login', 1000);
+        return;
+    }
+
+    const contentEl = document.getElementById('adMessageContent');
+    if (!contentEl) return;
+
+    const content = contentEl.value.trim();
+    if (!content) {
+        showAlert('warning', '⚠️ Please enter a message.');
+        return;
+    }
+
+    const button = document.getElementById('sendAdMessageBtn');
+    if (!button) return;
+
+    const receiverId = button.getAttribute('data-seller-id');
+    const adId = button.getAttribute('data-ad-id');
+
+    try {
+        const response = await fetch('/api/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ receiverId, adId, content })
+        });
+
+        if (response.ok) {
+            contentEl.value = '';
+            showAlert('success', '✅ Message sent to seller. They can read it in their messages.');
+            setTimeout(() => window.location.href = '/chat/messages', 800);
+        } else {
+            let errorText = '❌ Failed to send message.';
+            try {
+                const errorBody = await response.json();
+                errorText = errorBody.error || errorBody.message || errorText;
+            } catch (e) {
+            }
+            showAlert('danger', errorText);
+        }
+    } catch (e) {
+        showAlert('danger', '⚠️ Connection error. Could not send message.');
     }
 }
 

@@ -9,7 +9,10 @@ import java.util.List;
 
 public interface UserService {
     UserResponse register(RegisterRequest request);
+    /** @deprecated use sendLoginOtp + verifyLoginOtp instead */
     AuthResponse login(LoginRequest request);
+    void sendLoginOtp(String mobileNumber, String countryCode);
+    AuthResponse verifyLoginOtp(String mobileNumber, String countryCode, String otpCode);
     UserResponse getUserById(String id);
     UserResponse updateUser(String id, RegisterRequest request);
     void deleteUser(String id);

@@ -1,9 +1,9 @@
 package com.classified.app.controller;
 
-import com.classified.app.dto.request.LoginRequest;
 import com.classified.app.dto.request.RegisterRequest;
 import com.classified.app.dto.response.AuthResponse;
 import com.classified.app.dto.response.UserResponse;
+import com.classified.app.exception.BadRequestException;
 import com.classified.app.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -26,15 +26,36 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register")
-    @Operation(summary = "Register a new user")
+    @Operation(summary = "Register a new user (phone required)")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(userService.register(request));
     }
 
-    @PostMapping("/login")
-    @Operation(summary = "Login and get JWT token")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(userService.login(request));
+    @PostMapping("/login/send-otp")
+    @Operation(summary = "Send OTP to phone number for login")
+    public ResponseEntity<Map<String, String>> sendLoginOtp(@RequestBody Map<String, String> body) {
+        String mobileNumber = body.get("mobileNumber");
+        String countryCode = body.getOrDefault("countryCode", "91");
+        if (mobileNumber == null || mobileNumber.isBlank()) {
+            throw new BadRequestException("Mobile number is required");
+        }
+        userService.sendLoginOtp(mobileNumber, countryCode);
+        return ResponseEntity.ok(Map.of("message", "OTP sent successfully"));
+    }
+
+    @PostMapping("/login/verify-otp")
+    @Operation(summary = "Verify OTP and receive JWT token")
+    public ResponseEntity<AuthResponse> verifyLoginOtp(@RequestBody Map<String, String> body) {
+        String mobileNumber = body.get("mobileNumber");
+        String countryCode = body.getOrDefault("countryCode", "91");
+        String otpCode = body.get("otpCode");
+        if (mobileNumber == null || mobileNumber.isBlank()) {
+            throw new BadRequestException("Mobile number is required");
+        }
+        if (otpCode == null || otpCode.isBlank()) {
+            throw new BadRequestException("OTP code is required");
+        }
+        return ResponseEntity.ok(userService.verifyLoginOtp(mobileNumber, countryCode, otpCode));
     }
 
     @PutMapping("/profile/{id}")
@@ -55,10 +76,10 @@ public class AuthController {
         String oldPassword = body.get("oldPassword");
         String newPassword = body.get("newPassword");
         if (oldPassword == null || oldPassword.isBlank() || newPassword == null || newPassword.isBlank()) {
-            throw new com.classified.app.exception.BadRequestException("Both old and new passwords are required");
+            throw new BadRequestException("Both old and new passwords are required");
         }
         if (newPassword.length() < 6) {
-            throw new com.classified.app.exception.BadRequestException("New password must be at least 6 characters long");
+            throw new BadRequestException("New password must be at least 6 characters long");
         }
         userService.updatePassword(id, oldPassword, newPassword);
         return ResponseEntity.ok().build();

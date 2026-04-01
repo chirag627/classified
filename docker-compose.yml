@@ -10,12 +10,21 @@ services:
       - MONGODB_URI=mongodb://mongo:27017/classified
       - JWT_SECRET=classified-app-super-secret-key-must-be-at-least-256-bits-long-for-hs256
       - UPLOAD_DIR=/app/uploads
+      - MAIL_HOST=postfix-mailcow
+      - MAIL_PORT=587
+      - MAIL_USERNAME=noreply@oxxlo.in
+      - MAIL_PASSWORD=Oxxlo@2026Secure
+      - APP_BASE_URL=http://72.60.99.145:3000
+      - MC_TOKEN=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLTM2RTZGNDdCQkU4QTQ3QyIsImlhdCI6MTcyNDkzNjQ3MCwiZXhwIjoxODgyNjE2NDcwfQ.MS3fWTACMYs4oXVoFbXOCfYWntdtOUJVJjyIjN-dJAt3O39Jcz120-H_z5Yp1a7MNyll2OaCzDoptS1mota3Pg
+      - MC_COUNTRY_CODE=91
     volumes:
       - uploads_data:/app/uploads
     depends_on:
       - mongo
+      - mailhog
     networks:
       - classified-network
+      - mailcow-network
     restart: unless-stopped
 
   mongo:
@@ -45,6 +54,15 @@ services:
       - classified-network
     restart: unless-stopped
 
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: classified-mailhog
+    ports:
+      - "8025:8025"
+    networks:
+      - classified-network
+    restart: unless-stopped
+
 volumes:
   mongo_data:
   uploads_data:
@@ -52,3 +70,6 @@ volumes:
 networks:
   classified-network:
     driver: bridge
+  mailcow-network:
+    external: true
+    name: mailcowdockerized_mailcow-network

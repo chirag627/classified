@@ -4,6 +4,7 @@ import com.classified.app.dto.request.CreateAdRequest;
 import com.classified.app.dto.request.UpdateAdRequest;
 import com.classified.app.dto.response.AdResponse;
 import com.classified.app.dto.response.PagedResponse;
+import com.classified.app.exception.BadRequestException;
 import com.classified.app.exception.ResourceNotFoundException;
 import com.classified.app.exception.UnauthorizedException;
 import com.classified.app.model.Ad;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +52,7 @@ public class AdServiceImpl implements AdService {
                 .subcategoryId(request.getSubcategoryId())
                 .price(request.getPrice())
                 .negotiable(request.isNegotiable())
+                .hidePrice(request.isHidePrice())
                 .images(request.getImages())
                 .location(location)
                 .tags(request.getTags())
@@ -77,6 +80,7 @@ public class AdServiceImpl implements AdService {
         if (request.getSubcategoryId() != null) ad.setSubcategoryId(request.getSubcategoryId());
         if (request.getPrice() != null) ad.setPrice(request.getPrice());
         if (request.getNegotiable() != null) ad.setNegotiable(request.getNegotiable());
+        if (request.getHidePrice() != null) ad.setHidePrice(request.getHidePrice());
         if (request.getImages() != null) ad.setImages(request.getImages());
         if (request.getTags() != null) ad.setTags(request.getTags());
         if (request.getCondition() != null) ad.setCondition(request.getCondition());
@@ -107,28 +111,59 @@ public class AdServiceImpl implements AdService {
 
     @Override
     public AdResponse getAdById(String id) {
+        cleanupExpiredBoosts();
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ad", "id", id));
         return mapToResponse(ad, null);
     }
 
     @Override
+    public AdResponse boostAd(String id, String userId, Double amount, Integer days) {
+        if (amount == null || amount <= 0) {
+            throw new BadRequestException("Boost amount must be greater than 0");
+        }
+        if (days == null || days <= 0 || days > 30) {
+            throw new BadRequestException("Boost duration must be between 1 and 30 days");
+        }
+
+        Ad ad = adRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ad", "id", id));
+        if (!ad.getUserId().equals(userId)) {
+            throw new UnauthorizedException("You are not authorized to boost this ad");
+        }
+        if (ad.getStatus() != Ad.AdStatus.ACTIVE) {
+            throw new BadRequestException("Only active ads can be boosted");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        ad.setFeatured(true);
+        ad.setBoostAmount(amount);
+        ad.setBoostDays(days);
+        ad.setBoostExpiry(now.plusDays(days));
+        ad.setUpdatedAt(now);
+        return mapToResponse(adRepository.save(ad), userId);
+    }
+
+    @Override
     public PagedResponse<AdResponse> getAllAds(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        cleanupExpiredBoosts();
+        Pageable pageable = PageRequest.of(page, size, getBoostedSort());
         Page<Ad> ads = adRepository.findByStatus(Ad.AdStatus.ACTIVE, pageable);
         return buildPagedResponse(ads, null);
     }
 
     @Override
     public PagedResponse<AdResponse> getAdsByCategory(String categoryId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        cleanupExpiredBoosts();
+        Pageable pageable = PageRequest.of(page, size, getBoostedSort());
         Page<Ad> ads = adRepository.findByCategoryIdAndStatus(categoryId, Ad.AdStatus.ACTIVE, pageable);
         return buildPagedResponse(ads, null);
     }
 
     @Override
     public PagedResponse<AdResponse> searchAds(String keyword, String categoryId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        cleanupExpiredBoosts();
+        Pageable pageable = PageRequest.of(page, size, getBoostedSort());
         Page<Ad> ads;
         if (categoryId != null && !categoryId.isBlank()) {
             ads = adRepository.searchByKeywordAndCategory(categoryId, keyword, pageable);
@@ -140,14 +175,22 @@ public class AdServiceImpl implements AdService {
 
     @Override
     public List<AdResponse> getFeaturedAds() {
+        cleanupExpiredBoosts();
         return adRepository.findByFeaturedTrueAndStatus(Ad.AdStatus.ACTIVE).stream()
+                .sorted(Comparator.comparing(Ad::getBoostExpiry,
+                        Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(Ad::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(ad -> mapToResponse(ad, null))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<AdResponse> getAdsByUser(String userId) {
+        cleanupExpiredBoosts();
         return adRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                .sorted(Comparator.comparing(Ad::isFeatured).reversed()
+                        .thenComparing(Ad::getBoostExpiry, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(Ad::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(ad -> mapToResponse(ad, userId))
                 .collect(Collectors.toList());
     }
@@ -172,7 +215,8 @@ public class AdServiceImpl implements AdService {
 
     @Override
     public PagedResponse<AdResponse> getAdsByStatus(String status, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        cleanupExpiredBoosts();
+        Pageable pageable = PageRequest.of(page, size, getBoostedSort());
         Ad.AdStatus adStatus = Ad.AdStatus.valueOf(status.toUpperCase());
         Page<Ad> ads = adRepository.findByStatus(adStatus, pageable);
         return buildPagedResponse(ads, null);
@@ -193,13 +237,18 @@ public class AdServiceImpl implements AdService {
                     .map(Category::getName).orElse(null);
         }
         String userName = null;
+        String sellerPhone = null;
         if (ad.getUserId() != null) {
-            userName = userRepository.findById(ad.getUserId())
-                    .map(User::getName).orElse(null);
+            User seller = userRepository.findById(ad.getUserId()).orElse(null);
+            if (seller != null) {
+                userName = seller.getName();
+                sellerPhone = seller.getPhone();
+            }
         }
         boolean favorited = currentUserId != null &&
                 favoriteRepository.existsByUserIdAndAdId(currentUserId, ad.getId());
         long favoriteCount = favoriteRepository.countByAdId(ad.getId());
+        boolean boosted = ad.isFeatured() && ad.getBoostExpiry() != null && ad.getBoostExpiry().isAfter(LocalDateTime.now());
 
         return AdResponse.builder()
                 .id(ad.getId())
@@ -210,14 +259,20 @@ public class AdServiceImpl implements AdService {
                 .subcategoryId(ad.getSubcategoryId())
                 .price(ad.getPrice())
                 .negotiable(ad.isNegotiable())
+                .hidePrice(ad.isHidePrice())
                 .images(ad.getImages())
                 .location(ad.getLocation())
                 .tags(ad.getTags())
                 .condition(ad.getCondition())
                 .userId(ad.getUserId())
                 .userName(userName)
+                .sellerPhone(sellerPhone)
                 .status(ad.getStatus())
                 .featured(ad.isFeatured())
+                .boosted(boosted)
+                .boostAmount(ad.getBoostAmount())
+                .boostDays(ad.getBoostDays())
+                .boostExpiry(ad.getBoostExpiry())
                 .views(ad.getViews())
                 .createdAt(ad.getCreatedAt())
                 .updatedAt(ad.getUpdatedAt())
@@ -240,5 +295,26 @@ public class AdServiceImpl implements AdService {
                 .last(page.isLast())
                 .first(page.isFirst())
                 .build();
+    }
+
+    private Sort getBoostedSort() {
+        return Sort.by(
+                Sort.Order.desc("featured"),
+                Sort.Order.desc("boostExpiry"),
+                Sort.Order.desc("createdAt")
+        );
+    }
+
+    private void cleanupExpiredBoosts() {
+        List<Ad> expiredBoosts = adRepository.findByFeaturedTrueAndBoostExpiryBefore(LocalDateTime.now());
+        if (expiredBoosts.isEmpty()) {
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        expiredBoosts.forEach(ad -> {
+            ad.setFeatured(false);
+            ad.setUpdatedAt(now);
+        });
+        adRepository.saveAll(expiredBoosts);
     }
 }

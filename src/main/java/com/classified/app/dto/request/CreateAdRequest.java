@@ -27,6 +27,7 @@ public class CreateAdRequest {
     private Double price;
 
     private boolean negotiable;
+    private boolean hidePrice;
 
     private List<String> images = new ArrayList<>();
 

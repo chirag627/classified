@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AdRepository extends MongoRepository<Ad, String> {
@@ -14,6 +15,7 @@ public interface AdRepository extends MongoRepository<Ad, String> {
     Page<Ad> findByUserIdAndStatus(String userId, Ad.AdStatus status, Pageable pageable);
     List<Ad> findByUserIdOrderByCreatedAtDesc(String userId);
     List<Ad> findByFeaturedTrueAndStatus(Ad.AdStatus status);
+    List<Ad> findByFeaturedTrueAndBoostExpiryBefore(LocalDateTime now);
 
     @Query("{ 'status': 'ACTIVE', $or: [ { 'title': { $regex: ?0, $options: 'i' } }, { 'description': { $regex: ?0, $options: 'i' } } ] }")
     Page<Ad> searchByKeyword(String keyword, Pageable pageable);

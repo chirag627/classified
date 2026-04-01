@@ -12,6 +12,21 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
     encoding: UTF-8
+  mail:
+    host: ${MAIL_HOST:mailhog}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:noreply@oxxlo.in}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_AUTH:true}
+          starttls:
+            enable: ${MAIL_STARTTLS:true}
+            required: false
+          ssl:
+            trust: "*"
+            checkserveridentity: false
 
 app:
   jwt:
@@ -19,6 +34,10 @@ app:
     expiration: 86400000
   upload:
     dir: ${UPLOAD_DIR:uploads}
+  message-central:
+    token: ${MC_TOKEN:}
+    country-code: ${MC_COUNTRY_CODE:91}
+  base-url: ${APP_BASE_URL:http://localhost:3000}
 
 server:
   port: ${PORT:8080}

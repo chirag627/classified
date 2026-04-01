@@ -24,4 +24,6 @@ public class UserResponse {
     private LocalDateTime createdAt;
     private boolean active;
     private double avgRating;
+    private boolean phoneVerified;
+    private boolean emailVerified;
 }

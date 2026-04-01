@@ -20,9 +20,10 @@ public class User {
 
     private String name;
 
-    @Indexed(unique = true)
+    @Indexed(unique = true, sparse = true)
     private String email;
 
+    @Indexed(unique = true, sparse = true)
     private String phone;
     private String password;
     private String profileImage;
@@ -40,4 +41,13 @@ public class User {
 
     @Builder.Default
     private double avgRating = 0.0;
+
+    @Builder.Default
+    private boolean phoneVerified = false;
+
+    @Builder.Default
+    private boolean emailVerified = false;
+
+    private String emailVerificationToken;
+    private LocalDateTime emailVerificationExpiry;
 }

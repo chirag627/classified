@@ -12,6 +12,7 @@ public interface AdService {
     AdResponse updateAd(String id, UpdateAdRequest request, String userId);
     void deleteAd(String id, String userId);
     AdResponse getAdById(String id);
+    AdResponse boostAd(String id, String userId, Double amount, Integer days);
     PagedResponse<AdResponse> getAllAds(int page, int size);
     PagedResponse<AdResponse> getAdsByCategory(String categoryId, int page, int size);
     PagedResponse<AdResponse> searchAds(String keyword, String categoryId, int page, int size);

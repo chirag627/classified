@@ -1,6 +1,5 @@
 package com.classified.app.controller;
 
-import com.classified.app.dto.request.LoginRequest;
 import com.classified.app.dto.request.RegisterRequest;
 import com.classified.app.dto.response.AuthResponse;
 import com.classified.app.dto.response.UserResponse;
@@ -17,10 +16,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Map;
 import java.util.Set;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -49,13 +50,12 @@ class AuthControllerTest {
     void register_validRequest_returns200() throws Exception {
         RegisterRequest request = new RegisterRequest();
         request.setName("Test User");
-        request.setEmail("test@example.com");
-        request.setPassword("password123");
+        request.setPhone("9876543210");
 
         UserResponse response = UserResponse.builder()
                 .id("user1")
                 .name("Test User")
-                .email("test@example.com")
+                .phone("9876543210")
                 .roles(Set.of("USER"))
                 .active(true)
                 .build();
@@ -66,13 +66,13 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.phone").value("9876543210"))
                 .andExpect(jsonPath("$.name").value("Test User"));
     }
 
     @Test
-    void register_missingEmail_returns400() throws Exception {
-        String requestJson = "{\"name\":\"Test User\",\"password\":\"password123\"}";
+    void register_missingPhone_returns400() throws Exception {
+        String requestJson = "{\"name\":\"Test User\"}";
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,25 +81,31 @@ class AuthControllerTest {
     }
 
     @Test
-    void login_validRequest_returnsToken() throws Exception {
-        LoginRequest request = new LoginRequest();
-        request.setEmail("test@example.com");
-        request.setPassword("password123");
+    void sendLoginOtp_validPhone_returns200() throws Exception {
+        doNothing().when(userService).sendLoginOtp(eq("9876543210"), anyString());
 
+        mockMvc.perform(post("/api/auth/login/send-otp")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"mobileNumber\":\"9876543210\",\"countryCode\":\"91\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("OTP sent successfully"));
+    }
+
+    @Test
+    void verifyLoginOtp_validOtp_returnsToken() throws Exception {
         AuthResponse response = AuthResponse.builder()
                 .token("mock.jwt.token")
                 .tokenType("Bearer")
                 .id("user1")
                 .name("Test User")
-                .email("test@example.com")
                 .roles(Set.of("USER"))
                 .build();
 
-        when(userService.login(any(LoginRequest.class))).thenReturn(response);
+        when(userService.verifyLoginOtp(eq("9876543210"), anyString(), eq("123456"))).thenReturn(response);
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/auth/login/verify-otp")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content("{\"mobileNumber\":\"9876543210\",\"countryCode\":\"91\",\"otpCode\":\"123456\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("mock.jwt.token"))
                 .andExpect(jsonPath("$.tokenType").value("Bearer"));

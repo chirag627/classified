@@ -17,8 +17,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ads")
@@ -82,6 +82,17 @@ public class AdController {
             @Valid @RequestBody CreateAdRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(adService.createAd(request, userDetails.getUsername()));
+    }
+
+    @PostMapping("/{id}/boost")
+    @Operation(summary = "Boost an ad to show it at the top for a chosen time", security = @SecurityRequirement(name = "Bearer Authentication"))
+    public ResponseEntity<AdResponse> boostAd(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> body,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Double amount = body.get("amount") != null ? Double.valueOf(body.get("amount").toString()) : null;
+        Integer days = body.get("days") != null ? Integer.valueOf(body.get("days").toString()) : null;
+        return ResponseEntity.ok(adService.boostAd(id, userDetails.getUsername(), amount, days));
     }
 
     @PostMapping("/upload-images")

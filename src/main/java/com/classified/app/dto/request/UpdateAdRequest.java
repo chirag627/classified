@@ -13,6 +13,7 @@ public class UpdateAdRequest {
     private String subcategoryId;
     private Double price;
     private Boolean negotiable;
+    private Boolean hidePrice;
     private List<String> images;
     private String city;
     private String state;

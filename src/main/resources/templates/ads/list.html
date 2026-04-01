@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Ads - OLXAds</title>
+    <title>Browse Ads - Oxxlo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link th:href="@{/css/custom.css}" rel="stylesheet">
@@ -17,7 +17,7 @@
 <nav class="navbar navbar-expand-lg olx-navbar sticky-top">
     <div class="container">
         <a class="navbar-brand" th:href="@{/}">
-            <span style="color:#ffce32;font-weight:900;font-size:1.5rem;letter-spacing:-1px;">OLX</span><span style="color:white;font-size:1.1rem;font-weight:600;">Ads</span>
+            <span style="color:#ffce32;font-weight:900;font-size:1.5rem;letter-spacing:-1px;">Oxxlo</span>
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -109,13 +109,17 @@
                             <img th:src="${!#lists.isEmpty(ad.images) ? ad.images[0] : 'https://via.placeholder.com/300x200?text=No+Image'}"
                                  class="ad-thumb" alt="Ad"
                                  onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
-                            <span th:if="${ad.featured}" class="ad-badge-featured">⭐ Featured</span>
+                            <span th:if="${ad.boosted}" class="ad-badge-featured" style="background:#ff9800;">🚀 Boosted</span>
+                            <span th:if="${!ad.boosted and ad.featured}" class="ad-badge-featured">⭐ Featured</span>
                             <span th:if="${ad.condition != null}" class="ad-badge-condition" th:text="${ad.condition}">Condition</span>
                         </div>
                         <div class="ad-body">
-                            <div class="ad-price">
+                            <div class="ad-price" th:if="${!ad.hidePrice}">
                                 ₹ <span th:text="${#numbers.formatDecimal(ad.price, 1, 0)}">0</span>
                                 <small class="text-muted fw-normal" style="font-size:10px;" th:if="${ad.negotiable}"> Negotiable</small>
+                            </div>
+                            <div class="ad-price" th:if="${ad.hidePrice}" style="font-size:0.95rem;color:#666;">
+                                Price on request
                             </div>
                             <div class="ad-title" th:text="${ad.title}">Title</div>
                             <div class="ad-meta">
@@ -168,7 +172,7 @@
 <!-- Footer -->
 <footer class="olx-footer">
     <div class="container">
-        <p class="footer-bottom text-center mb-0">&copy; 2024 OLXAds. All rights reserved.</p>
+        <p class="footer-bottom text-center mb-0">&copy; 2024 Oxxlo. All rights reserved.</p>
     </div>
 </footer>
 

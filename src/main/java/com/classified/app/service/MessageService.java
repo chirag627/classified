@@ -10,5 +10,6 @@ public interface MessageService {
     List<MessageResponse> getConversation(String userId1, String userId2);
     List<MessageResponse> getUserMessages(String userId);
     void markAsRead(String conversationId, String userId);
+    void markAsReadConversation(String userId, String otherUserId);
     long getUnreadCount(String userId);
 }

@@ -47,12 +47,12 @@ public class MessageController {
         return ResponseEntity.ok(messageService.getUserMessages(userDetails.getUsername()));
     }
 
-    @PutMapping("/read/{conversationId}")
+    @PutMapping("/read/{otherUserId}")
     @Operation(summary = "Mark conversation as read")
     public ResponseEntity<Void> markAsRead(
-            @PathVariable String conversationId,
+            @PathVariable String otherUserId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        messageService.markAsRead(conversationId, userDetails.getUsername());
+        messageService.markAsReadConversation(userDetails.getUsername(), otherUserId);
         return ResponseEntity.ok().build();
     }
 
